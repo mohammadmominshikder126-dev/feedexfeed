@@ -1,0 +1,293 @@
+{
+  "entities": {
+    "AppConfig": {
+      "title": "AppConfig",
+      "description": "Global platform configuration synced in real time to all users across all domains",
+      "type": "object",
+      "properties": {
+        "rechargeNumbers": {
+          "type": "object",
+          "description": "bKash, Nagad, and Rocket Send Money merchant numbers"
+        },
+        "telegramLink": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Official Telegram channel or group URL"
+        },
+        "supportLink": {
+          "type": "string",
+          "maxLength": 300,
+          "description": "Live customer support URL"
+        },
+        "referralRates": {
+          "type": "object",
+          "description": "Level 1, 2, 3 commission percentages"
+        },
+        "signupBonus": {
+          "type": "number",
+          "description": "New user registration bonus in BDT"
+        },
+        "telegramBonus": {
+          "type": "number",
+          "description": "Telegram join bonus in BDT"
+        },
+        "minDeposit": {
+          "type": "number",
+          "description": "Minimum deposit amount in BDT"
+        },
+        "minWithdraw": {
+          "type": "number",
+          "description": "Minimum withdrawal amount in BDT"
+        },
+        "plans": {
+          "type": "array",
+          "description": "Available VIP and Welfare plans"
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "rechargeNumbers",
+        "telegramLink",
+        "supportLink",
+        "referralRates",
+        "signupBonus",
+        "telegramBonus",
+        "minDeposit",
+        "minWithdraw",
+        "plans",
+        "updatedAt"
+      ]
+    },
+    "AdminCredentials": {
+      "title": "AdminCredentials",
+      "description": "Hashed administrator credentials",
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "passHash": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "updatedAt": {
+          "type": "string",
+          "maxLength": 64
+        }
+      },
+      "required": ["username", "passHash", "updatedAt"]
+    },
+    "Member": {
+      "title": "Member",
+      "description": "Registered FeedexDigital member account",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 32 },
+        "phone": { "type": "string", "maxLength": 20 },
+        "passwordHash": { "type": "string", "maxLength": 128 },
+        "withdrawPasswordHash": { "type": "string", "maxLength": 128 },
+        "balance": { "type": "number" },
+        "totalRecharge": { "type": "number" },
+        "totalWithdraw": { "type": "number" },
+        "totalEarned": { "type": "number" },
+        "referralCode": { "type": "string", "maxLength": 32 },
+        "referredBy": { "type": "string", "maxLength": 32 },
+        "uplinePhones": { "type": "array" },
+        "walletMethod": { "type": "string", "enum": ["", "bkash", "nagad", "rocket"] },
+        "walletNumber": { "type": "string", "maxLength": 20 },
+        "blocked": { "type": "boolean" },
+        "telegramBonusClaimed": { "type": "boolean" },
+        "lastSpinAt": { "type": "string", "maxLength": 64 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": [
+        "id",
+        "phone",
+        "passwordHash",
+        "withdrawPasswordHash",
+        "balance",
+        "totalRecharge",
+        "totalWithdraw",
+        "totalEarned",
+        "referralCode",
+        "referredBy",
+        "uplinePhones",
+        "walletMethod",
+        "walletNumber",
+        "blocked",
+        "telegramBonusClaimed",
+        "lastSpinAt",
+        "createdAt"
+      ]
+    },
+    "Deposit": {
+      "title": "Deposit",
+      "description": "Member deposit submission with Send Money TrxID",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "memberId": { "type": "string", "maxLength": 32 },
+        "memberPhone": { "type": "string", "maxLength": 20 },
+        "amount": { "type": "number" },
+        "method": { "type": "string", "enum": ["bkash", "nagad", "rocket"] },
+        "targetNumber": { "type": "string", "maxLength": 20 },
+        "trxId": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": [
+        "id",
+        "memberId",
+        "memberPhone",
+        "amount",
+        "method",
+        "targetNumber",
+        "trxId",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Withdrawal": {
+      "title": "Withdrawal",
+      "description": "Member withdrawal request",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "memberId": { "type": "string", "maxLength": 32 },
+        "memberPhone": { "type": "string", "maxLength": 20 },
+        "amount": { "type": "number" },
+        "method": { "type": "string", "enum": ["bkash", "nagad", "rocket"] },
+        "walletNumber": { "type": "string", "maxLength": 20 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "createdAt": { "type": "string", "maxLength": 64 },
+        "updatedAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": [
+        "id",
+        "memberId",
+        "memberPhone",
+        "amount",
+        "method",
+        "walletNumber",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Investment": {
+      "title": "Investment",
+      "description": "Active or completed plan purchased by a member",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "memberId": { "type": "string", "maxLength": 32 },
+        "memberPhone": { "type": "string", "maxLength": 20 },
+        "planId": { "type": "string", "maxLength": 32 },
+        "planName": { "type": "string", "maxLength": 100 },
+        "price": { "type": "number" },
+        "dailyIncome": { "type": "number" },
+        "cycleDays": { "type": "number" },
+        "daysClaimed": { "type": "number" },
+        "lastClaimedAt": { "type": "string", "maxLength": 64 },
+        "status": { "type": "string", "enum": ["active", "completed"] },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": [
+        "id",
+        "memberId",
+        "memberPhone",
+        "planId",
+        "planName",
+        "price",
+        "dailyIncome",
+        "cycleDays",
+        "daysClaimed",
+        "lastClaimedAt",
+        "status",
+        "createdAt"
+      ]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Ledger transaction entry for a member",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "memberId": { "type": "string", "maxLength": 32 },
+        "memberPhone": { "type": "string", "maxLength": 20 },
+        "type": {
+          "type": "string",
+          "enum": [
+            "signup_bonus",
+            "telegram_bonus",
+            "deposit",
+            "withdraw",
+            "plan_buy",
+            "daily_income",
+            "referral_commission",
+            "admin_adjust",
+            "spin_bonus"
+          ]
+        },
+        "amount": { "type": "number" },
+        "description": { "type": "string", "maxLength": 240 },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "memberId", "memberPhone", "type", "amount", "description", "createdAt"]
+    },
+    "LivePayment": {
+      "title": "LivePayment",
+      "description": "Public masked live payment feed item",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 64 },
+        "maskedPhone": { "type": "string", "maxLength": 24 },
+        "amount": { "type": "number" },
+        "method": { "type": "string", "enum": ["bkash", "nagad", "rocket"] },
+        "type": { "type": "string", "enum": ["deposit", "withdraw"] },
+        "createdAt": { "type": "string", "maxLength": 64 }
+      },
+      "required": ["id", "maskedPhone", "amount", "method", "type", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/app_config/{configId}": {
+      "schema": { "$ref": "#/entities/AppConfig" },
+      "description": "Global site settings including bKash/Nagad/Rocket recharge numbers, plans, referral rates, and Telegram/Support links"
+    },
+    "/admin_credentials/{credId}": {
+      "schema": { "$ref": "#/entities/AdminCredentials" },
+      "description": "Admin panel credentials"
+    },
+    "/members/{memberPhone}": {
+      "schema": { "$ref": "#/entities/Member" },
+      "description": "Registered member profiles keyed by phone number"
+    },
+    "/deposits/{depositId}": {
+      "schema": { "$ref": "#/entities/Deposit" },
+      "description": "Deposit requests with TrxID"
+    },
+    "/withdrawals/{withdrawalId}": {
+      "schema": { "$ref": "#/entities/Withdrawal" },
+      "description": "Withdrawal requests"
+    },
+    "/investments/{investmentId}": {
+      "schema": { "$ref": "#/entities/Investment" },
+      "description": "Member purchased plans"
+    },
+    "/transactions/{txId}": {
+      "schema": { "$ref": "#/entities/Transaction" },
+      "description": "Member financial transaction records"
+    },
+    "/live_payments/{paymentId}": {
+      "schema": { "$ref": "#/entities/LivePayment" },
+      "description": "Public masked live payment feed"
+    }
+  }
+}

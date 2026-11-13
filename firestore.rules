@@ -1,0 +1,232 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function isValidStr(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+
+    function isValidNonEmptyStr(val, maxLen) {
+      return val is string && val.size() >= 1 && val.size() <= maxLen;
+    }
+
+    function isValidMethod(m) {
+      return m in ['bkash', 'nagad', 'rocket'];
+    }
+
+    function isValidAppConfig(data) {
+      return data.keys().hasAll([
+        'rechargeNumbers', 'telegramLink', 'supportLink', 'referralRates',
+        'signupBonus', 'telegramBonus', 'minDeposit', 'minWithdraw', 'plans', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'rechargeNumbers', 'telegramLink', 'supportLink', 'referralRates',
+        'signupBonus', 'telegramBonus', 'minDeposit', 'minWithdraw', 'plans', 'updatedAt'
+      ])
+      && data.rechargeNumbers is map
+      && data.rechargeNumbers.keys().hasAll(['bkash', 'nagad', 'rocket'])
+      && data.rechargeNumbers.keys().hasOnly(['bkash', 'nagad', 'rocket'])
+      && isValidStr(data.rechargeNumbers.bkash, 24)
+      && isValidStr(data.rechargeNumbers.nagad, 24)
+      && isValidStr(data.rechargeNumbers.rocket, 24)
+      && isValidStr(data.telegramLink, 300)
+      && isValidStr(data.supportLink, 300)
+      && data.referralRates is map
+      && data.referralRates.keys().hasAll(['level1', 'level2', 'level3'])
+      && data.referralRates.keys().hasOnly(['level1', 'level2', 'level3'])
+      && data.referralRates.level1 is number && data.referralRates.level1 >= 0 && data.referralRates.level1 <= 50
+      && data.referralRates.level2 is number && data.referralRates.level2 >= 0 && data.referralRates.level2 <= 50
+      && data.referralRates.level3 is number && data.referralRates.level3 >= 0 && data.referralRates.level3 <= 50
+      && data.signupBonus is number && data.signupBonus >= 0 && data.signupBonus <= 100000
+      && data.telegramBonus is number && data.telegramBonus >= 0 && data.telegramBonus <= 100000
+      && data.minDeposit is number && data.minDeposit >= 1 && data.minDeposit <= 1000000
+      && data.minWithdraw is number && data.minWithdraw >= 1 && data.minWithdraw <= 1000000
+      && data.plans is list && data.plans.size() >= 1 && data.plans.size() <= 30
+      && isValidNonEmptyStr(data.updatedAt, 64);
+    }
+
+    function isValidAdminCred(data) {
+      return data.keys().hasAll(['username', 'passHash', 'updatedAt'])
+        && data.keys().hasOnly(['username', 'passHash', 'updatedAt'])
+        && isValidNonEmptyStr(data.username, 64)
+        && isValidNonEmptyStr(data.passHash, 128)
+        && isValidNonEmptyStr(data.updatedAt, 64);
+    }
+
+    function isValidMember(data) {
+      return data.keys().hasAll([
+        'id', 'phone', 'passwordHash', 'withdrawPasswordHash', 'balance',
+        'totalRecharge', 'totalWithdraw', 'totalEarned', 'referralCode',
+        'referredBy', 'uplinePhones', 'walletMethod', 'walletNumber',
+        'blocked', 'telegramBonusClaimed', 'lastSpinAt', 'createdAt'
+      ]) && data.keys().hasOnly([
+        'id', 'phone', 'passwordHash', 'withdrawPasswordHash', 'balance',
+        'totalRecharge', 'totalWithdraw', 'totalEarned', 'referralCode',
+        'referredBy', 'uplinePhones', 'walletMethod', 'walletNumber',
+        'blocked', 'telegramBonusClaimed', 'lastSpinAt', 'createdAt'
+      ])
+      && isValidNonEmptyStr(data.id, 32)
+      && isValidNonEmptyStr(data.phone, 20)
+      && isValidNonEmptyStr(data.passwordHash, 128)
+      && isValidStr(data.withdrawPasswordHash, 128)
+      && data.balance is number && data.balance >= 0 && data.balance <= 100000000
+      && data.totalRecharge is number && data.totalRecharge >= 0 && data.totalRecharge <= 100000000
+      && data.totalWithdraw is number && data.totalWithdraw >= 0 && data.totalWithdraw <= 100000000
+      && data.totalEarned is number && data.totalEarned >= 0 && data.totalEarned <= 100000000
+      && isValidNonEmptyStr(data.referralCode, 32)
+      && isValidStr(data.referredBy, 32)
+      && data.uplinePhones is list && data.uplinePhones.size() <= 3
+      && data.walletMethod in ['', 'bkash', 'nagad', 'rocket']
+      && isValidStr(data.walletNumber, 20)
+      && data.blocked is bool
+      && data.telegramBonusClaimed is bool
+      && isValidStr(data.lastSpinAt, 64)
+      && isValidNonEmptyStr(data.createdAt, 64);
+    }
+
+    function isValidDeposit(data) {
+      return data.keys().hasAll([
+        'id', 'memberId', 'memberPhone', 'amount', 'method',
+        'targetNumber', 'trxId', 'status', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'id', 'memberId', 'memberPhone', 'amount', 'method',
+        'targetNumber', 'trxId', 'status', 'createdAt', 'updatedAt'
+      ])
+      && isValidNonEmptyStr(data.id, 64)
+      && isValidNonEmptyStr(data.memberId, 32)
+      && isValidNonEmptyStr(data.memberPhone, 20)
+      && data.amount is number && data.amount > 0 && data.amount <= 10000000
+      && isValidMethod(data.method)
+      && isValidNonEmptyStr(data.targetNumber, 20)
+      && isValidNonEmptyStr(data.trxId, 64)
+      && data.status in ['pending', 'approved', 'rejected']
+      && isValidNonEmptyStr(data.createdAt, 64)
+      && isValidNonEmptyStr(data.updatedAt, 64);
+    }
+
+    function isValidWithdrawal(data) {
+      return data.keys().hasAll([
+        'id', 'memberId', 'memberPhone', 'amount', 'method',
+        'walletNumber', 'status', 'createdAt', 'updatedAt'
+      ]) && data.keys().hasOnly([
+        'id', 'memberId', 'memberPhone', 'amount', 'method',
+        'walletNumber', 'status', 'createdAt', 'updatedAt'
+      ])
+      && isValidNonEmptyStr(data.id, 64)
+      && isValidNonEmptyStr(data.memberId, 32)
+      && isValidNonEmptyStr(data.memberPhone, 20)
+      && data.amount is number && data.amount > 0 && data.amount <= 10000000
+      && isValidMethod(data.method)
+      && isValidNonEmptyStr(data.walletNumber, 20)
+      && data.status in ['pending', 'approved', 'rejected']
+      && isValidNonEmptyStr(data.createdAt, 64)
+      && isValidNonEmptyStr(data.updatedAt, 64);
+    }
+
+    function isValidInvestment(data) {
+      return data.keys().hasAll([
+        'id', 'memberId', 'memberPhone', 'planId', 'planName',
+        'price', 'dailyIncome', 'cycleDays', 'daysClaimed',
+        'lastClaimedAt', 'status', 'createdAt'
+      ]) && data.keys().hasOnly([
+        'id', 'memberId', 'memberPhone', 'planId', 'planName',
+        'price', 'dailyIncome', 'cycleDays', 'daysClaimed',
+        'lastClaimedAt', 'status', 'createdAt'
+      ])
+      && isValidNonEmptyStr(data.id, 64)
+      && isValidNonEmptyStr(data.memberId, 32)
+      && isValidNonEmptyStr(data.memberPhone, 20)
+      && isValidNonEmptyStr(data.planId, 32)
+      && isValidNonEmptyStr(data.planName, 100)
+      && data.price is number && data.price > 0 && data.price <= 10000000
+      && data.dailyIncome is number && data.dailyIncome > 0 && data.dailyIncome <= 10000000
+      && data.cycleDays is number && data.cycleDays >= 1 && data.cycleDays <= 3650
+      && data.daysClaimed is number && data.daysClaimed >= 0 && data.daysClaimed <= 3650
+      && isValidStr(data.lastClaimedAt, 64)
+      && data.status in ['active', 'completed']
+      && isValidNonEmptyStr(data.createdAt, 64);
+    }
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['id', 'memberId', 'memberPhone', 'type', 'amount', 'description', 'createdAt'])
+        && data.keys().hasOnly(['id', 'memberId', 'memberPhone', 'type', 'amount', 'description', 'createdAt'])
+        && isValidNonEmptyStr(data.id, 64)
+        && isValidNonEmptyStr(data.memberId, 32)
+        && isValidNonEmptyStr(data.memberPhone, 20)
+        && data.type in [
+          'signup_bonus', 'telegram_bonus', 'deposit', 'withdraw',
+          'plan_buy', 'daily_income', 'referral_commission', 'admin_adjust', 'spin_bonus'
+        ]
+        && data.amount is number && data.amount >= -10000000 && data.amount <= 10000000
+        && isValidNonEmptyStr(data.description, 240)
+        && isValidNonEmptyStr(data.createdAt, 64);
+    }
+
+    function isValidLivePayment(data) {
+      return data.keys().hasAll(['id', 'maskedPhone', 'amount', 'method', 'type', 'createdAt'])
+        && data.keys().hasOnly(['id', 'maskedPhone', 'amount', 'method', 'type', 'createdAt'])
+        && isValidNonEmptyStr(data.id, 64)
+        && isValidNonEmptyStr(data.maskedPhone, 24)
+        && data.amount is number && data.amount > 0 && data.amount <= 10000000
+        && isValidMethod(data.method)
+        && data.type in ['deposit', 'withdraw']
+        && isValidNonEmptyStr(data.createdAt, 64);
+    }
+
+    match /app_config/{configId} {
+      allow get: if isValidId(configId);
+      allow create, update: if isValidId(configId) && isValidAppConfig(incoming());
+    }
+
+    match /admin_credentials/{credId} {
+      allow get: if isValidId(credId);
+      allow create, update: if isValidId(credId) && isValidAdminCred(incoming());
+    }
+
+    match /members/{memberPhone} {
+      allow get: if isValidId(memberPhone);
+      allow list: if true;
+      allow create, update: if isValidId(memberPhone) && isValidMember(incoming());
+    }
+
+    match /deposits/{depositId} {
+      allow get: if isValidId(depositId);
+      allow list: if true;
+      allow create, update: if isValidId(depositId) && isValidDeposit(incoming());
+    }
+
+    match /withdrawals/{withdrawalId} {
+      allow get: if isValidId(withdrawalId);
+      allow list: if true;
+      allow create, update: if isValidId(withdrawalId) && isValidWithdrawal(incoming());
+    }
+
+    match /investments/{investmentId} {
+      allow get: if isValidId(investmentId);
+      allow list: if true;
+      allow create, update: if isValidId(investmentId) && isValidInvestment(incoming());
+    }
+
+    match /transactions/{txId} {
+      allow get: if isValidId(txId);
+      allow list: if true;
+      allow create: if isValidId(txId) && isValidTransaction(incoming());
+    }
+
+    match /live_payments/{paymentId} {
+      allow get: if isValidId(paymentId);
+      allow list: if true;
+      allow create: if isValidId(paymentId) && isValidLivePayment(incoming());
+    }
+  }
+}

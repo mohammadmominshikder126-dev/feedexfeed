@@ -1,0 +1,8 @@
+{
+  "name": "FeedexDigital",
+  "description": "FeedexDigital - বিশ্বস্ত ডিজিটাল লজিস্টিকস ও পার্টনার ইনকাম প্ল্যাটফর্ম। বিকাশ, নগদ ও রকেট সাপোর্ট এবং রিয়েল-টাইম লেনদেন।",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
